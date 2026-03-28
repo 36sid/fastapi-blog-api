@@ -9,10 +9,15 @@ router = APIRouter(prefix="/blogs", tags=["Blogs"])
 # Create blog
 @router.post("/", response_model=Blog)
 def create_blog(blog: Blog, session: Session = Depends(get_session)):
-    session.add(blog)
-    session.commit()
-    session.refresh(blog)
-    return blog
+    try:
+        print(blog)
+        session.add(blog)
+        session.commit()
+        session.refresh(blog)
+        return blog
+    except Exception as e:
+        print(f"Error creating blog: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Get all blogs
