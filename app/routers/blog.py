@@ -26,14 +26,14 @@ def create_blog(request: Request, blog: Blog, session: Session = Depends(get_ses
 # Get all blogs
 @router.get("/", response_model=list[Blog])
 @limiter.limit("30/minute")
-def get_blogs(request: Request, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+def get_blogs(request: Request, session: Session = Depends(get_session)):
     return session.exec(select(Blog)).all()
 
 
 # Get single blog
 @router.get("/{blog_id}", response_model=Blog)
 @limiter.limit("30/minute")
-def get_blog(request: Request, blog_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+def get_blog(request: Request, blog_id: int, session: Session = Depends(get_session)):
     blog = session.get(Blog, blog_id)
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
