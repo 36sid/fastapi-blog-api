@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session, select
-from ..models import Blog
+from ..models import Blog, User
+from ..auth.dependencies import get_current_user
+from app.rate_limit import limiter
 from ..database import get_session
 
 router = APIRouter(prefix="/blogs", tags=["Blogs"])
@@ -8,7 +10,8 @@ router = APIRouter(prefix="/blogs", tags=["Blogs"])
 
 # Create blog
 @router.post("/", response_model=Blog)
-def create_blog(blog: Blog, session: Session = Depends(get_session)):
+@limiter.limit("10/minute")
+def create_blog(request: Request, blog: Blog, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     try:
         print(blog)
         session.add(blog)
@@ -22,13 +25,15 @@ def create_blog(blog: Blog, session: Session = Depends(get_session)):
 
 # Get all blogs
 @router.get("/", response_model=list[Blog])
-def get_blogs(session: Session = Depends(get_session)):
+@limiter.limit("30/minute")
+def get_blogs(request: Request, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     return session.exec(select(Blog)).all()
 
 
 # Get single blog
 @router.get("/{blog_id}", response_model=Blog)
-def get_blog(blog_id: int, session: Session = Depends(get_session)):
+@limiter.limit("30/minute")
+def get_blog(request: Request, blog_id: int, session: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     blog = session.get(Blog, blog_id)
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
