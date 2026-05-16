@@ -8,8 +8,7 @@ from .database import engine
 from .routers import blog, auth
 
 app = FastAPI()
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,6 +17,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 SQLModel.metadata.create_all(engine)
 
