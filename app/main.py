@@ -8,16 +8,18 @@ from .database import engine
 from .routers import blog, auth
 
 app = FastAPI()
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://blog-frontend-react1.vercel.app"],  # for development
+    allow_origins=["http://localhost:5173", "https://blog-frontend-react-phi.vercel.app"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 SQLModel.metadata.create_all(engine)
 
